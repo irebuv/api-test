@@ -1,0 +1,46 @@
+# =====================
+# ОБЩИЕ СИСТЕМНЫЕ ФАЙЛЫ
+# =====================
+.DS_Store
+Thumbs.db
+*.log
+
+# =====================
+# BACKEND (Laravel)
+# =====================
+cms-backend/.env
+cms-backend/.env.backup
+cms-backend/.env.production
+cms-backend/.phpactor.json
+cms-backend/.phpunit.result.cache
+cms-backend/.fleet
+cms-backend/.idea
+cms-backend/.nova
+cms-backend/.phpunit.cache
+cms-backend/.vscode
+cms-backend/.zed
+cms-backend/auth.json
+cms-backend/public/build
+cms-backend/public/hot
+cms-backend/public/storage
+cms-backend/storage/*.key
+cms-backend/storage/pail
+cms-backend/vendor
+cms-backend/Homestead.json
+cms-backend/Homestead.yaml
+
+# =====================
+# FRONTEND (React)
+# =====================
+frontend/node_modules
+frontend/.pnp
+frontend/.pnp.js
+frontend/coverage
+frontend/build
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
