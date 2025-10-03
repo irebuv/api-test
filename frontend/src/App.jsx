@@ -44,7 +44,10 @@ function App() {
             <button onClick={fetchFromDB} style={{margin: '10px'}}>
                 Загрузить из БД
             </button>
-
+            <div className="bg-blue-500 text-white p-6 rounded-lg shadow-lg mb-8 text-center">
+                <p className="text-xl font-bold">Hello Tailwind 4! 🚀</p>
+                <p className="text-blue-100">Если этот блок синий - Tailwind работает!</p>
+            </div>
             <div>
                 {console.log(posts)}
                 <h2>Посты:</h2>
