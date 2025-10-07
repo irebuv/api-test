@@ -1,0 +1,53 @@
+import React, { useState } from "react";
+import { toast } from "@/components/ui/custom/sonner";
+import api from "@/lib/axios";
+
+const LoginPage = () => {
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+
+    const handleLogin = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try {
+            const res = await api.post("/login", { email, password });
+            localStorage.setItem("token", res.data.token);
+            toast.success("Успешный вход!");
+            window.location.href = "/dashboard";
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    return (
+        <div className="flex items-center justify-center h-screen bg-gray-100">
+            <form
+                onSubmit={handleLogin}
+                className="bg-white p-8 rounded-2xl shadow-lg w-96"
+            >
+                <h1 className="text-2xl font-bold mb-6 text-center">Вход</h1>
+                <input
+                    className="border w-full p-2 mb-3 rounded-md"
+                    type="email"
+                    placeholder="Email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                />
+                <input
+                    className="border w-full p-2 mb-4 rounded-md"
+                    type="password"
+                    placeholder="Пароль"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                />
+                <button
+                    className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700"
+                    type="submit"
+                >
+                    Войти
+                </button>
+            </form>
+        </div>
+    );
+};
+
+export default LoginPage;

@@ -39,18 +39,18 @@ return [
     |
     */
 
-//    'guards' => [
-//        'web' => [
-//            'driver' => 'jwt',
-//            'provider' => 'users',
-//        ],
-//    ],
     'guards' => [
         'web' => [
-            'driver' => 'session',
+            'driver' => 'jwt',
             'provider' => 'users',
         ],
     ],
+//    'guards' => [
+//        'web' => [
+//            'driver' => 'session',
+//            'provider' => 'users',
+//        ],
+//    ],
 
     /*
     |--------------------------------------------------------------------------

@@ -3,13 +3,16 @@ import axios from 'axios';
 import './App.css';
 import Home from "./pages/public/home";
 import { toast } from '@/components/ui/custom/sonner';
+import { Routes, Route, Navigate} from "react-router-dom";
+import LoginPage from "@/pages/user/login";
+import Dashboard from "@/pages/user/dashboard";
+import { ProtectedRoute } from "@/lib/auth/ProtectedRoute";
 function App() {
     const [message, setMessage] = useState('');
     const [posts, setPosts] = useState([]);
 
-    // Тестируем подключение к API
     useEffect(() => {
-        axios.get('http://first-api.loc/test')
+        axios.get('http://first-api.loc/api/test')
             .then(response => {
                 setMessage(response.data.message);
             })
@@ -19,21 +22,33 @@ function App() {
             });
     }, []);
 
-    toast.success('Успешно!');
-    toast.error('Ошибка!');
 
     const fetchFromDB = async () => {
         try {
-            const response = await axios.get('http://first-api.loc/posts');
-            setPosts(response.data); // Покажем данные из БД вместо постов
+            const response = await axios.get('http://first-api.loc/api/posts');
+            setPosts(response.data);
+            toast.success('Успешно!');
         } catch (error) {
             console.error('Ошибка БД:', error);
             alert('Ошибка подключения к БД');
+            toast.error('Ошибка!');
         }
     };
 
     return (
         <div className="App" style={{ padding: '20px' }}>
+            <Routes>
+                <Route path="/" element={<Navigate to="/login" replace />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route
+                    path="/dashboard"
+                    element={
+                        <ProtectedRoute>
+                            <Dashboard />
+                        </ProtectedRoute>
+                    }
+                />
+            </Routes>
             <h1>Моя CMS</h1>
 
             <div style={{
