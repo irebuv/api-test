@@ -7,11 +7,11 @@ import MainLayout from "../../layouts/main-layout";
 //         href: '/home',
 //     },
 // ];
-export default function Home() {
+export default function Businesses() {
     return (
         <MainLayout>
             <div>
-                home
+                bus
             </div>
         </MainLayout>
     );

@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
 import { useState } from 'react';
 import NavLinks from "@/components/shared/Header/NavLinks";
+import {useAuth} from "@/context/AuthContext";
 
 type NavLink = {
     title: string
@@ -9,9 +10,11 @@ type NavLink = {
 }
 
 type MenuHeaderProps = {
-    linksNav: NavLink[]
+    linksNav: NavLink[];
+    hasLogout?: boolean;
 }
-function MenuHeader({ linksNav } : MenuHeaderProps  ) {
+function MenuHeader({ linksNav, hasLogout } : MenuHeaderProps  ) {
+    const {user, logout} = useAuth();
     const [profileOpen, setProfileOpen] = useState(false);
     return (
         <div className="relative">
@@ -34,6 +37,11 @@ function MenuHeader({ linksNav } : MenuHeaderProps  ) {
                             className="space-y-4 bg-white px-6 py-4 font-medium text-gray-700 shadow-md"
                         >
                             <NavLinks linksNav={linksNav} />
+                            {(user && hasLogout) && (
+                                <button onClick={logout}>
+                                    Logout
+                                </button>
+                            )}
                         </motion.nav>
                     )}
                 </AnimatePresence>
