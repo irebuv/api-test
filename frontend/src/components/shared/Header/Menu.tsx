@@ -12,10 +12,12 @@ type NavLink = {
 type MenuHeaderProps = {
     linksNav: NavLink[];
     hasLogout?: boolean;
+    title?: string;
 }
-function MenuHeader({ linksNav, hasLogout } : MenuHeaderProps  ) {
+function MenuHeader({ linksNav, hasLogout, title } : MenuHeaderProps  ) {
     const {user, logout} = useAuth();
     const [profileOpen, setProfileOpen] = useState(false);
+    console.log(title)
     return (
         <div className="relative">
             <button
@@ -24,7 +26,7 @@ function MenuHeader({ linksNav, hasLogout } : MenuHeaderProps  ) {
                     setProfileOpen(!profileOpen);
                 }}
             >
-                <div className="flex">Menu {profileOpen ? <X className="h-7 w-7 text-gray-700" /> : <Menu className="h-7 w-7 text-gray-700" />}</div>
+                <div className="flex">{title ? title : "Menu"} {profileOpen ? <X className="h-7 w-7 text-gray-700" /> : <Menu className="h-7 w-7 text-gray-700" />}</div>
             </button>
             <div className="absolute left-[-50%] flex space-x-8 font-medium text-gray-700">
                 <AnimatePresence>

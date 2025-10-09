@@ -1,7 +1,6 @@
 import { type ReactNode } from 'react';
 import MainContent from "./app-content";
 import Header from "../components/shared/Header/Header";
-import {Toaster} from "@/components/ui/custom/sonner";
 
 interface AppLayoutProps {
     children?: ReactNode;
@@ -22,7 +21,6 @@ export default function MainLayout ({ children, className }: AppLayoutProps) {
     return (
         <>
             <Header></Header>
-            <Toaster />
             <div className={className}>
                 <MainContent>{children}</MainContent>
             </div>

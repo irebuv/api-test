@@ -31,8 +31,8 @@ function Header() {
             href: '/',
         },
         {
-            title: 'Categories',
-            href: '/categories',
+            title: 'admin',
+            href: '/admin',
         },
     ];
 
@@ -63,7 +63,7 @@ function Header() {
                     а
                 </div>
                 {user ? (
-                    <MenuHeader linksNav={linksNav2} hasLogout={true}/>
+                    <MenuHeader linksNav={linksNav2} hasLogout={true} title={user.name}/>
                 ) : (
                     <Link to="/login">Login</Link>
                 )}

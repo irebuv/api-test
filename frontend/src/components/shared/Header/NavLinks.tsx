@@ -13,8 +13,6 @@ type NavLinksProps = {
 
 function NavLinks({onClick, linksNav}: NavLinksProps) {
 
-    console.log(linksNav)
-
     return (
         <div className=" gap-3 ">
 
