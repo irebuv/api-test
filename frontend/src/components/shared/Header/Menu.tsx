@@ -38,7 +38,7 @@ function MenuHeader({ linksNav, hasLogout } : MenuHeaderProps  ) {
                         >
                             <NavLinks linksNav={linksNav} />
                             {(user && hasLogout) && (
-                                <button onClick={logout}>
+                                <button className={'cursor-pointer'} onClick={logout}>
                                     Logout
                                 </button>
                             )}
