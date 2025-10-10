@@ -17,7 +17,6 @@ type MenuHeaderProps = {
 function MenuHeader({ linksNav, hasLogout, title } : MenuHeaderProps  ) {
     const {user, logout} = useAuth();
     const [profileOpen, setProfileOpen] = useState(false);
-    console.log(title)
     return (
         <div className="relative">
             <button

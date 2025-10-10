@@ -5,20 +5,19 @@ import {useAuth} from "@/context/AuthContext";
 interface ProtectedRouteProps {
     children: ReactNode;
     allowedRoles?: string[];
-    redirectTo?: string;
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles, redirectTo = "/", }) => {
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles }) => {
     const {user, loading} = useAuth();
 
     if (loading) return null;
 
     if (!user) {
-        return <Navigate to={redirectTo} replace state={{ toastMessage: "You must be authorized to visit this page!" }}/>;
+        return <Navigate to="/login" replace state={{ toastMessage: "You must be authorized to visit this page!" }}/>;
     }
 
     if (allowedRoles && !allowedRoles.includes(user.role)) {
-        return <Navigate to={redirectTo} replace state={{ toastMessage: "You don\'t have permission to visit this page!"}}/>;
+        return <Navigate to="/" replace state={{ toastMessage: "You don\'t have permission to visit this page!"}}/>;
     }
 
     return <>{children}</>;

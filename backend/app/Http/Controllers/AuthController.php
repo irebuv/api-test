@@ -28,10 +28,15 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
+
         $credentials = $request->only('email', 'password');
         if (!$token = auth()->attempt($credentials)) {
             return response()->json(['error' => 'Invalid credentials'], 401);
         }
+        if ($request->rememberMe) {
+            auth()->factory()->setTTL(config('jwt.refresh_ttl'));
+        }
+
         return response()->json(['token' => $token]);
     }
 

@@ -5,14 +5,15 @@ import api from "@/lib/axios";
 const LoginPage = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [rememberMe, setRememberMe] = useState(false);
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const res = await api.post("/login", { email, password });
+            const res = await api.post("/login", { email, password, rememberMe });
             localStorage.setItem("token", res.data.token);
-            toast.success("Успешный вход!");
-            window.location.href = "/dashboard";
+            toast.success("Welcome!");
+            window.location.href = "/";
         } catch (err) {
             console.error(err);
         }
@@ -39,6 +40,14 @@ const LoginPage = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                 />
+                <label htmlFor="rememberMe" className='cursor-pointer'>
+                    <input type="checkbox"
+                           id="rememberMe"
+                           checked={rememberMe}
+                           onChange={(e) => setRememberMe(e.target.checked)}
+                    /> &nbsp;
+                    Remember
+                </label>
                 <button
                     className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700"
                     type="submit"
