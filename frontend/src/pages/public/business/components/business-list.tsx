@@ -24,7 +24,7 @@ interface BusinessProps {
 }
 function BusinessList({ businesses, onEdit, onDelete, onCreateRequest }: BusinessProps) {
     const {user} = useAuth();
-    console.log(businesses)
+    console.log(user)
     return (
         <div className={'grid gap-8 sm:grid-cols-1 md:grid-cols-2'}>
             {businesses.map((el) => (

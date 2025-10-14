@@ -1,4 +1,5 @@
 import MainLayout from "../../layouts/main-layout";
+import { Flex, Text, Button } from "@radix-ui/themes";
 
 //
 // const breadcrumbs: BreadcrumbItem[] = [
@@ -11,7 +12,10 @@ export default function Home() {
     return (
         <MainLayout>
             <div>
-                home
+                <Flex direction="column" gap="2">
+                    <Text>Hello from Radix Themes :)</Text>
+                    <Button>Let's go</Button>
+                </Flex>
             </div>
         </MainLayout>
     );

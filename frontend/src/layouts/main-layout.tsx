@@ -1,6 +1,7 @@
 import { type ReactNode } from 'react';
 import MainContent from "./app-content";
 import Header from "../components/shared/Header/Header";
+import {Theme} from "@radix-ui/themes";
 
 interface AppLayoutProps {
     children?: ReactNode;
@@ -20,10 +21,12 @@ export default function MainLayout ({ children, className }: AppLayoutProps) {
     // }, [flash]);
     return (
         <>
-            <Header></Header>
-            <div className={className}>
-                <MainContent>{children}</MainContent>
-            </div>
+            <Theme>
+                <Header></Header>
+                <div className={className}>
+                    <MainContent>{children}</MainContent>
+                </div>
+            </Theme>
         </>
     );
 }
