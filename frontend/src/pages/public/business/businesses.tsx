@@ -6,6 +6,12 @@ import {Pagination} from "@/components/ui/custom/pagination";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import type {BusinessResponse, PaginatedResponse} from "@/types/businesses";
 import axios from "@/lib/axios";
+import {useAuth} from "@/context/AuthContext";
+import {Button} from "@/components/ui/button";
+import {Input} from "@/components/ui/input";
+import {CustomModalForm} from "@/components/custom-modal-form";
+import {BusinessModalFormConfig} from "@/components/config/config-business-modal-form";
+import DialogRequestShow from "@/pages/public/business/components/request-modal";
 
 export default function Businesses() {
     const [data, setData] = useState<BusinessResponse | null>(null);
@@ -13,8 +19,9 @@ export default function Businesses() {
     const searchParams = new URLSearchParams(window.location.search);
     const [filters, setFilters] = useState({
         type: searchParams.get('type') || 'all',
-        myProjects: searchParams.get('myProjects') || '0',
+        myProjects: searchParams.get('myProjects') || 0,
     });
+    const {user} = useAuth();
     console.log(data)
     useEffect(() => {
         api
@@ -29,7 +36,7 @@ export default function Businesses() {
             const params = new URLSearchParams(window.location.search);
             setFilters({
                 type: params.get('type') || 'all',
-                myProjects: params.get('myProjects') || '0',
+                myProjects: params.get('myProjects') || 0,
             });
             fetchData(params);
         };
@@ -82,42 +89,41 @@ export default function Businesses() {
                     </Select>
                 </div>
                 <div className="ml-auto">
-                    {/*{auth.user ? (*/}
-                    {/*    <div className="flex items-center gap-3">*/}
-                    {/*        <label htmlFor="myBusinesses" className={'flex w-full cursor-pointer items-center p-2'}>*/}
-                    {/*            <span>Only my projects</span>*/}
-                    {/*            &nbsp;&nbsp;*/}
-                    {/*            <Input*/}
-                    {/*                className={'w-[30px] cursor-pointer'}*/}
-                    {/*                id="myBusinesses"*/}
-                    {/*                type={'checkbox'}*/}
-                    {/*                checked={myProjects == 1}*/}
-                    {/*                onChange={(e) =>*/}
-                    {/*                    updateFilters({ myProjects: e.target.checked ? 1 : 0 })*/}
-                    {/*                }*/}
-                    {/*            />*/}
-                    {/*        </label>*/}
-                    {/*        <DialogRequestShow myRequests={myRequests} unreadCount={unreadCount}/>*/}
-                    {/*        <CustomModalForm*/}
-                    {/*            addButton={BusinessModalFormConfig.addButton}*/}
-                    {/*            title={mode === 'create_request' ? BusinessModalFormRequest.title : BusinessModalFormConfig.title}*/}
-                    {/*            description={mode === 'create_request' ? BusinessModalFormRequest.description : BusinessModalFormConfig.description}*/}
-                    {/*            fields={mode === 'create_request' ? BusinessModalFormRequest.fields : BusinessModalFormConfig.fields}*/}
-                    {/*            buttons={BusinessModalFormConfig.buttons}*/}
-                    {/*            data={data}*/}
-                    {/*            setData={setData}*/}
-                    {/*            errors={errors}*/}
-                    {/*            processing={processing}*/}
-                    {/*            handleSubmit={handleSubmit}*/}
-                    {/*            open={modalOpen}*/}
-                    {/*            onOpenChange={handleModalToggle}*/}
-                    {/*            mode={mode}*/}
-                    {/*            previewImage={previewImage}*/}
-                    {/*        />*/}
-                    {/*    </div>*/}
-                    {/*) : (*/}
-                    {/*    <Button disabled>Log in to add a project...</Button>*/}
-                    {/*)}*/}
+                    {user ? (
+                        <div className="flex items-center gap-3">
+                            <label htmlFor="myBusinesses" className={'flex w-full cursor-pointer items-center p-2'}>
+                                <span>Only my projects</span>
+                                &nbsp;&nbsp;
+                                <Input
+                                    className={'w-[30px] cursor-pointer'}
+                                    id="myBusinesses"
+                                    type={'checkbox'}
+                                    checked={data?.myProjects == 1}
+                                    onChange={(e) =>
+                                        updateFilters({ myProjects: e.target.checked ? 1 : 0 })
+                                    }
+                                />
+                            </label>
+                            <DialogRequestShow myRequests={data?.myRequests ?? []} unreadCount={data?.unreadCount}/>
+                            {/*<CustomModalForm*/}
+                            {/*    addButton={BusinessModalFormConfig.addButton}*/}
+                            {/*    title={BusinessModalFormConfig.title}*/}
+                            {/*    description={BusinessModalFormConfig.description}*/}
+                            {/*    fields={BusinessModalFormConfig.fields}*/}
+                            {/*    buttons={BusinessModalFormConfig.buttons}*/}
+                            {/*    data={data}*/}
+                            {/*    // setData={setData}*/}
+                            {/*    // errors={errors}*/}
+                            {/*    // processing={processing}*/}
+                            {/*    // handleSubmit={handleSubmit}*/}
+                            {/*    // open={modalOpen}*/}
+                            {/*    // onOpenChange={handleModalToggle}*/}
+                            {/*    // mode={mode}*/}
+                            {/*/>*/}
+                        </div>
+                    ) : (
+                        <Button disabled>Log in to add a project...</Button>
+                    )}
                 </div>
             </div>
 
@@ -127,7 +133,7 @@ export default function Businesses() {
                 businesses={data?.businesses.data ?? []}
                 //onDelete={handleDelete}
             />
-            <Pagination products={data?.businesses} rowPerPage={false}/>
+            {/*<Pagination products={data?.businesses} rowPerPage={false}/>*/}
         </MainLayout>
     );
 }
