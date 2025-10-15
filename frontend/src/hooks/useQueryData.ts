@@ -24,7 +24,6 @@ export function useQueryData<TData, TFilters extends Record<string, any>>({
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<any>(null);
 
-    // 📌 Функция запроса данных
     const fetchData = useCallback(async (paramsObj: TFilters) => {
         setLoading(true);
         try {
@@ -40,7 +39,6 @@ export function useQueryData<TData, TFilters extends Record<string, any>>({
         }
     }, [url]);
 
-    // 📌 Обновление фильтров из компонента
     const setFilters = (newValues: Partial<TFilters>) => {
         const updated = { ...filters, ...newValues };
         setFiltersState(updated);
@@ -51,7 +49,6 @@ export function useQueryData<TData, TFilters extends Record<string, any>>({
         fetchData(updated);
     };
 
-    // 📌 Первичная загрузка + реагирование на кнопки "Назад" / "Вперед"
     useEffect(() => {
         fetchData(filters);
 

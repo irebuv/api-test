@@ -1,73 +1,92 @@
 import MainLayout from "@/layouts/main-layout";
 import BusinessList from "@/pages/public/business/components/business-list";
-import {useEffect, useState} from "react";
+import {useState} from "react";
 import api from "@/lib/axios";
 import {Pagination} from "@/components/ui/custom/pagination";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import type {BusinessResponse, PaginatedResponse} from "@/types/businesses";
-import axios from "@/lib/axios";
 import {useAuth} from "@/context/AuthContext";
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
-import {CustomModalForm} from "@/components/custom-modal-form";
+import CustomModalForm from "@/components/custom-modal-form";
 import {BusinessModalFormConfig} from "@/components/config/config-business-modal-form";
 import DialogRequestShow from "@/pages/public/business/components/request-modal";
+import {useApiForm} from "@/hooks/useApiForm";
+import { useQueryData } from "@/hooks/useQueryData";
 
 export default function Businesses() {
-    const [data, setData] = useState<BusinessResponse | null>(null);
-    const [loading, setLoading] = useState(true);
-    const searchParams = new URLSearchParams(window.location.search);
-    const [filters, setFilters] = useState({
-        type: searchParams.get('type') || 'all',
-        myProjects: searchParams.get('myProjects') || 0,
+    const { data, filters, setFilters, loading } = useQueryData<BusinessResponse, {
+        type: string;
+        myProjects: number | string;
+    }>({
+        url: "/businesses",
+        initial: { type: "all", myProjects: 0 },
     });
-    const {user} = useAuth();
-    console.log(data)
-    useEffect(() => {
-        api
-            .get<BusinessResponse>("/businesses")
-            .then((res) => setData(res.data))
-            .catch((err) => console.error(err))
-            .finally(() => setLoading(false));
-    }, []);
 
-    useEffect(() => {
-        const onPopState = () => {
-            const params = new URLSearchParams(window.location.search);
-            setFilters({
-                type: params.get('type') || 'all',
-                myProjects: params.get('myProjects') || 0,
-            });
-            fetchData(params);
-        };
-        window.addEventListener('popstate', onPopState);
-        return () => window.removeEventListener('popstate', onPopState);
-    }, []);
-    useEffect(() => {
-        fetchData(new URLSearchParams(window.location.search));
-    }, []);
+    /*-----------Form block start-----------*/
+    /*-----------Form block start-----------*/
+    /*-----------Form block start-----------*/
+    const [modalOpen, setModalOpen] = useState(false);
+    const [mode, setMode] = useState<"create" | "edit">("create");
+    const [editingId, setEditingId] = useState<number | null>(null);
+    const {  data: formData, setData: setFormData, reset, errors, processing, submit } = useApiForm({
+        name: "",
+        description: "",
+        image: null as File | null,
+        type: "",
+    });
 
-    const fetchData = async (paramsOverride?: URLSearchParams) => {
-        const params = paramsOverride || new URLSearchParams(window.location.search);
+    const openCreate = () => {
+        reset(); // очистить форму
+        setMode("create");
+        setEditingId(null);
+        setModalOpen(true);
+    };
 
-        const response = await axios.get('/businesses', {
-            params: Object.fromEntries(params.entries()),
+    const openEdit = (item: any) => {
+        console.log(item)
+        reset({
+            name: item.name ?? "",
+            description: item.description ?? "",
+            image: null,
+            type: item.type ?? "",
         });
-        setData(response.data);
+        setMode("edit");
+        setEditingId(item.id);
+        setModalOpen(true);
+    };
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        const form = new FormData();
+        Object.entries(formData).forEach(([key, value]) => {
+            form.append(key, value ?? "");
+        });
+        console.log(form)
+        try {
+            if (mode === 'create') {
+                const response = await api.post("/businesses", form, {
+                    headers: { "Content-Type": "multipart/form-data" },
+                });
+                console.log("✅ Успешно:", response.data);
+            } else if(mode === "edit" && editingId){
+                form.append("_method", "PUT");
+                const response = await api.post(`/businesses/${editingId}`, form, {
+                    headers: { "Content-Type": "multipart/form-data" },
+                });
+                console.log("✅ Успешно:", response.data);
+            }
+
+        } catch (error: any) {
+            console.error("Error:", error.response?.data || error);
+        }
     };
 
-    const updateFilters = (newValues: Partial<typeof filters>) => {
-        const updated = { ...filters, ...newValues };
-        setFilters(updated);
+    /*-----------Form block end-----------*/
+    /*-----------Form block end-----------*/
+    /*-----------Form block end-----------*/
+    const {user} = useAuth();
 
-        const params = new URLSearchParams(updated);
-        window.history.pushState({}, '', `?${params.toString()}`);
-
-        fetchData(params);
-    };
-
-
-    if (loading) return <div>Loading...</div>;
     return (
         <MainLayout className="mx-auto mt-5 flex max-w-[1150px] flex-col gap-5 px-7">
 
@@ -75,7 +94,7 @@ export default function Businesses() {
                 <div className={'w-[200px]'}>
                     <Select
                         value={filters.type}
-                        onValueChange={(value) => updateFilters({type: value})}
+                        onValueChange={(value) => setFilters({ type: value })}
                     >
                         <SelectTrigger>
                             <SelectValue placeholder={`All`}></SelectValue>
@@ -91,7 +110,7 @@ export default function Businesses() {
                 <div className="ml-auto">
                     {user ? (
                         <div className="flex items-center gap-3">
-                            <label htmlFor="myBusinesses" className={'flex w-full cursor-pointer items-center p-2'}>
+                            <label htmlFor="myBusinesses" className={'flex w-full cursor-pointer items-center justify-end p-2'}>
                                 <span>Only my projects</span>
                                 &nbsp;&nbsp;
                                 <Input
@@ -99,27 +118,28 @@ export default function Businesses() {
                                     id="myBusinesses"
                                     type={'checkbox'}
                                     checked={data?.myProjects == 1}
-                                    onChange={(e) =>
-                                        updateFilters({ myProjects: e.target.checked ? 1 : 0 })
-                                    }
+                                    onChange={(e) => setFilters({ myProjects: e.target.checked ? 1 : 0 })}
                                 />
                             </label>
                             <DialogRequestShow myRequests={data?.myRequests ?? []} unreadCount={data?.unreadCount}/>
-                            {/*<CustomModalForm*/}
-                            {/*    addButton={BusinessModalFormConfig.addButton}*/}
-                            {/*    title={BusinessModalFormConfig.title}*/}
-                            {/*    description={BusinessModalFormConfig.description}*/}
-                            {/*    fields={BusinessModalFormConfig.fields}*/}
-                            {/*    buttons={BusinessModalFormConfig.buttons}*/}
-                            {/*    data={data}*/}
-                            {/*    // setData={setData}*/}
-                            {/*    // errors={errors}*/}
-                            {/*    // processing={processing}*/}
-                            {/*    // handleSubmit={handleSubmit}*/}
-                            {/*    // open={modalOpen}*/}
-                            {/*    // onOpenChange={handleModalToggle}*/}
-                            {/*    // mode={mode}*/}
-                            {/*/>*/}
+                            <CustomModalForm
+                                open={modalOpen}
+                                onOpenChange={setModalOpen}
+                                title={mode === "create" ? "Create Business" : "Edit Business"}
+                                description={mode === "create" ? "Create new" : "Edit existing"}
+                                fields={[
+                                    { id: "name", name: "name", label: "Name", type: "text" },
+                                    { id: "description", name: "description", label: "Description", type: "textarea" },
+                                    { id: "type", name: "type", label: "Type", type: "text" },
+                                    { id: "image", name: "image", label: "Image", type: "file" },
+                                ]}
+                                data={formData}
+                                setData={setFormData}
+                                errors={errors}
+                                processing={processing}
+                                onSubmit={handleSubmit}
+                                submitLabel={mode === "create" ? "Create" : "Save"}
+                            />
                         </div>
                     ) : (
                         <Button disabled>Log in to add a project...</Button>
@@ -128,8 +148,7 @@ export default function Businesses() {
             </div>
 
             <BusinessList
-                //onEdit={(project) => openModal('edit', project)}
-                //onCreateRequest={(project) => openModal('create_request', project)}
+                onEdit={(el) => openEdit(el)}
                 businesses={data?.businesses.data ?? []}
                 //onDelete={handleDelete}
             />

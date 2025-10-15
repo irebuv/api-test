@@ -30,8 +30,8 @@ class BusinessController extends Controller
         $myRequests = Order::query()
             ->select('orders.*', 'businesses.name as business_name', 'businesses.image as business_image')
             ->join('businesses', 'orders.business_id', '=', 'businesses.id')
-            //->whereHas('business', fn($q) => $q
-            //->where('user_id', auth()->user()->id))
+            ->whereHas('business', fn($q) => $q
+            ->where('user_id', auth('api')->id()))
             ->orderBy('created_at', 'desc')
             ->get();
         $unreadCount = $myRequests->where('is_read', false)->count();
@@ -81,68 +81,95 @@ class BusinessController extends Controller
 
     public function store(Request $request)
     {
-        if (!auth()->user()) {
-            return redirect()->back()->with("error", 'You not authorized to create a project!');
+        if (!auth('api')->check()) {
+            return response()->json([
+                'message' => 'Unauthorized',
+            ], 401);
         }
+
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'required|string|max:255',
             'type' => 'required|string|max:255',
-            //'image' => 'nullable|mimes:png,jpg,gif,jpeg,JPEG,PNG,JPG,webp',
+            // 'image' => 'nullable|mimes:png,jpg,gif,jpeg,webp|max:2048',
         ]);
-        try {
-            $ImagePath = null;
 
-            $folders = date('Y') . '/' . date('m') . '/' . date('d');
+        try {
+            $imagePath = null;
+
             if ($request->hasFile('image')) {
-                $ImagePath = $request->file("image")->store("images/businesses/{$folders}", "public");
+                $folders = date('Y') . '/' . date('m') . '/' . date('d');
+                $imagePath = $request->file('image')->store("images/businesses/{$folders}", "public");
             }
 
             $business = Business::create([
                 "name" => $request->name,
                 "description" => $request->description,
-                "image" => $ImagePath,
+                "image" => $imagePath,
                 "type" => $request->type,
-                "user_id" => $request->user()->id,
+                "user_id" => auth('api')->id(),
             ]);
 
-            if ($business) {
-                return redirect()->route("business.index")->with("success", "Your project added successfully!");
-            }
-            return redirect()->back()->with("error", 'Filed to create project');
+            return response()->json([
+                'message' => 'Business created successfully',
+                'business' => $business,
+            ], 201);
+
         } catch (\Exception $e) {
-            return redirect()->back()->with("error", 'Filed to create project');
+            return response()->json([
+                'message' => 'Failed to create project',
+                'error' => $e->getMessage(),
+            ], 500);
         }
     }
+
 
     public function update(Request $request, Business $business)
     {
-        if (!auth()->user()) {
-            return redirect()->back()->with("error", 'You not authorized to create a project!');
+        logger('request data is', $request->all());
+        if (!auth('api')->check()) {
+            return response()->json([
+                'message' => 'Unauthorized',
+            ], 401);
         }
-        if ($business && $business->user_id === auth()->id()) {
-            try {
-                if ($image = $request->file('image')) {
-                    if ($business->image) {
-                        Storage::disk('public')->delete($business->image);
-                    }
-                    $folders = date('Y') . '/' . date('m') . '/' . date('d');
-                    $image = $image->store("images/businesses/{$folders}", 'public');
-                    $business->image = $image;
+
+        if (!$business || $business->user_id !== auth('api')->id()) {
+            return response()->json([
+                'message' => 'Forbidden',
+            ], 403);
+        }
+
+        try {
+            if ($image = $request->file('image')) {
+                if ($business->image) {
+                    Storage::disk('public')->delete($business->image);
                 }
-                $business->name = $request->name;
-                $business->description = $request->description;
-                $business->type = $request->type;
-                $business->save();
-                return redirect()->back()->with('success', 'Project updated successfully!');
-            } catch (\Exception $e) {
-                Log::error($e->getMessage());
-                return redirect()->back()->with("error", 'Filed to edit project');
+
+                $folders = date('Y') . '/' . date('m') . '/' . date('d');
+                $image = $image->store("images/businesses/{$folders}", 'public');
+                $business->image = $image;
             }
-        } else {
-            return redirect()->back()->with("error", 'Filed to edit project');
+
+            $business->name = $request->name;
+            $business->description = $request->description;
+            $business->type = $request->type;
+
+            $business->save();
+
+            return response()->json([
+                'message' => 'Project updated successfully!',
+                'business' => $business,
+            ], 200);
+
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+
+            return response()->json([
+                'message' => 'Failed to edit project',
+            ], 500);
         }
     }
+
 
     public function destroy(Business $business)
     {
