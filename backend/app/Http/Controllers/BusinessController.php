@@ -31,40 +31,44 @@ class BusinessController extends Controller
             ->select('orders.*', 'businesses.name as business_name', 'businesses.image as business_image')
             ->join('businesses', 'orders.business_id', '=', 'businesses.id')
             ->whereHas('business', fn($q) => $q
-            ->where('user_id', auth('api')->id()))
+                ->where('user_id', auth('api')->id()))
             ->orderBy('created_at', 'desc')
             ->get();
         $unreadCount = $myRequests->where('is_read', false)->count();
-        logger($businesses);
         return response()->json([
             'businesses' => $businesses,
-            'myProjects' => (bool) $myProjects,
+            'myProjects' => (bool)$myProjects,
             'types' => $types,
             'myRequests' => $myRequests,
             'unreadCount' => $unreadCount,
         ]);
     }
 
-    public function request(Request $request)
+    public function request(Request $request, $editingId)
     {
         $request->validate([
-            'request_name' => 'required|string|max:255',
-            'request_description' => 'required|string',
+            'name' => 'required|string|max:255',
+            'description' => 'required|string',
             'date' => 'required|string|max:255',
             'phone' => 'required|string|max:20',
         ]);
         $order = Order::create([
-            "name" => $request->request_name,
-            "description" => $request->request_description,
+            "name" => $request->name,
+            "description" => $request->description,
             "date" => $request->date,
             "phone" => $request->phone,
-            "business_id" => $request->id,
+            "business_id" => $editingId,
         ]);
 
         if ($order) {
-            return redirect()->route("business.index")->with("success", "Your request added successfully! We feedback you soon!");
+
+            return response()->json([
+                'message' => 'Your request added successfully! We feedback you soon!',
+            ], 201);
         }
-        return redirect()->back()->with("error", 'Filed to create request!');
+        return response()->json([
+            'error' => 'Failed to create project',
+        ], 500);
 
     }
 
@@ -112,7 +116,6 @@ class BusinessController extends Controller
 
             return response()->json([
                 'message' => 'Business created successfully',
-                'business' => $business,
             ], 201);
 
         } catch (\Exception $e) {
@@ -126,19 +129,24 @@ class BusinessController extends Controller
 
     public function update(Request $request, Business $business)
     {
-        logger('request data is', $request->all());
         if (!auth('api')->check()) {
             return response()->json([
                 'message' => 'Unauthorized',
             ], 401);
         }
 
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'required|string|max:255',
+            'type' => 'required|string|max:255',
+            //'image' => 'nullable|mimes:png,jpg,gif,jpeg,webp|max:2048',
+        ]);
+
         if (!$business || $business->user_id !== auth('api')->id()) {
             return response()->json([
                 'message' => 'Forbidden',
             ], 403);
         }
-
         try {
             if ($image = $request->file('image')) {
                 if ($business->image) {

@@ -1,3 +1,4 @@
+// hooks/useQueryData.ts
 import { useEffect, useState, useCallback } from "react";
 import api from "@/lib/axios";
 
@@ -27,9 +28,7 @@ export function useQueryData<TData, TFilters extends Record<string, any>>({
     const fetchData = useCallback(async (paramsObj: TFilters) => {
         setLoading(true);
         try {
-            const response = await api.get<TData>(url, {
-                params: paramsObj,
-            });
+            const response = await api.get<TData>(url, { params: paramsObj });
             setData(response.data);
             setError(null);
         } catch (err) {
@@ -38,6 +37,10 @@ export function useQueryData<TData, TFilters extends Record<string, any>>({
             setLoading(false);
         }
     }, [url]);
+
+    const refetch = useCallback(() => {
+        fetchData(filters);
+    }, [filters, fetchData]);
 
     const setFilters = (newValues: Partial<TFilters>) => {
         const updated = { ...filters, ...newValues };
@@ -67,5 +70,5 @@ export function useQueryData<TData, TFilters extends Record<string, any>>({
         return () => window.removeEventListener("popstate", onPopState);
     }, []);
 
-    return { data, filters, setFilters, loading, error };
+    return { data, filters, setFilters, loading, error, refetch };
 }

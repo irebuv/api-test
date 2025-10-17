@@ -10,3 +10,4 @@ Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:api'
 Route::get('/me', [AuthController::class, 'me'])->middleware('auth:api');
 
 Route::resource('/businesses', BusinessController::class);
+Route::post("/businesses/request/{editingId}", [BusinessController::class, 'request']);

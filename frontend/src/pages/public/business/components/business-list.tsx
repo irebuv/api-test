@@ -18,7 +18,7 @@ interface Business {
 
 interface BusinessProps {
     onDelete?: (id: number, route: string) => void;
-    onCreateRequest?: (project: Business) => void;
+    onCreateRequest?: (id: number) => void;
     onEdit?: (project: Business) => void;
     businesses: Business[];
 }
@@ -61,7 +61,7 @@ function BusinessList({ businesses, onEdit, onDelete, onCreateRequest }: Busines
                             </span>
                         </div>
                             <div>
-                                <Button variant={'outline'} className={'cursor-pointer'} onClick={() => onCreateRequest?.(el)}>
+                                <Button variant={'outline'} className={'cursor-pointer'} onClick={() => onCreateRequest?.(el.id)}>
                                     create a request
                                 </Button>
                             </div>

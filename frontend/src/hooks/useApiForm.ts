@@ -1,5 +1,6 @@
+// hooks/useApiForm.ts
 import { useState } from "react";
-import axios, { AxiosError } from "axios";
+import api from "@/lib/axios";
 
 type Errors = Record<string, string[]>;
 
@@ -27,11 +28,13 @@ export function useApiForm<T extends Record<string, any>>(initial: T) {
         setErrors({});
 
         try {
-            let payload: any;
-            let headers: Record<string,string> = {};
+            let payload: any = null;
+            const headers: Record<string, string> = {};
 
             if (options?.asFormData) {
                 const form = new FormData();
+
+                // Добавляем все поля
                 Object.entries(data).forEach(([k, v]) => {
                     if (v === undefined || v === null) return;
                     if (v instanceof File) {
@@ -39,17 +42,24 @@ export function useApiForm<T extends Record<string, any>>(initial: T) {
                     } else if (Array.isArray(v)) {
                         v.forEach(item => form.append(`${k}[]`, item));
                     } else {
-                        form.append(k, v);
+                        form.append(k, String(v));
                     }
                 });
+
+                // 🧠 Laravel не читает тело при PUT/PATCH multipart — добавляем _method
+                if (method === "put" || method === "patch") {
+                    form.append("_method", method.toUpperCase());
+                    method = "post"; // фактически шлём POST
+                }
+
                 payload = form;
-                headers["Content-Type"] = "multipart/form-data";
+                // Content-Type не ставим — браузер сам добавит boundary
             } else {
                 payload = data;
                 headers["Content-Type"] = "application/json";
             }
 
-            const res = await axios.request({
+            const res = await api.request({
                 url,
                 method,
                 data: payload,
@@ -58,14 +68,14 @@ export function useApiForm<T extends Record<string, any>>(initial: T) {
 
             options?.onSuccess?.(res.data);
             return res.data;
-        } catch (err) {
-            const e = err as AxiosError<any>;
-            if (e.response?.data?.errors) {
+        } catch (err: any) {
+            const e = err;
+            if (e?.response?.status === 422 && e.response.data?.errors) {
                 setErrors(e.response.data.errors);
-            } else if (e.response?.data?.message) {
+            } else if (e?.response?.data?.message) {
                 setErrors({ _global: [e.response.data.message] });
             } else {
-                setErrors({ _global: ["Ошибка сервера"] });
+                setErrors({ _global: ["Server error"] });
             }
             throw err;
         } finally {

@@ -1,7 +1,6 @@
-import React from "react";
+import React, {useState} from "react";
 import {
     Dialog,
-    DialogTrigger,
     DialogContent,
     DialogHeader,
     DialogTitle,
@@ -13,6 +12,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import InputError from "@/components/ui/input-error";
+import {DayPicker} from "react-day-picker";
+import {format} from "date-fns";
+import "react-day-picker/dist/style.css";
 
 type Field = {
     id: string;
@@ -26,7 +28,7 @@ type Props = {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     title: string;
-    description?: string;
+    description?: string | ' ';
     fields: Field[];
     data: Record<string, any>;
     setData: (name: string, value: any) => void;
@@ -49,12 +51,10 @@ export default function CustomModalForm({
                                             onSubmit,
                                             submitLabel = "Submit",
                                         }: Props) {
+
+    const [selectedDate, setSelectedDate] = useState<Date>();
     return (
         <Dialog open={open} onOpenChange={onOpenChange} modal>
-            <DialogTrigger asChild>
-                <Button type="button" className="cursor-pointer">{title}</Button>
-            </DialogTrigger>
-
             <DialogContent className="sm:max-w-[640px]">
                 <DialogHeader>
                     <DialogTitle>{title}</DialogTitle>
@@ -81,6 +81,29 @@ export default function CustomModalForm({
                                     type="file"
                                     onChange={(e) => setData(f.name, e.target.files ? e.target.files[0] : null)}
                                 />
+                            ) : f.type === 'date-select' ? (
+                                <div className="flex flex-col">
+                                    <DayPicker
+                                        mode="single"
+                                        selected={selectedDate}
+                                        onSelect={(date) => {
+                                            setSelectedDate(date);
+                                            if (date) {
+                                                setData(f.name, format(date, "yyyy-MM-dd"));
+                                            } else {
+                                                setData(f.name, '');
+                                            }
+                                        }}
+                                        className={'shadow-blue-500 shadow p-3 max-w-max min-h-[372px] border-2'}
+                                    />
+                                    <p className="mt-2 text-sm text-gray-600 min-h-[20px]">
+                                        {selectedDate ? (
+                                            <span>You picked {selectedDate.toDateString()}</span>
+                                        ) : (
+                                            <span>Please chose a date!</span>
+                                        )}
+                                    </p>
+                                </div>
                             ) : (
                                 <Input
                                     id={f.id}
@@ -100,11 +123,11 @@ export default function CustomModalForm({
 
                     <DialogFooter>
                         <DialogClose asChild>
-                            <Button type="button" variant="outline">
+                            <Button type="button" variant="outline" className="cursor-pointer">
                                 Cancel
                             </Button>
                         </DialogClose>
-                        <Button type="submit" disabled={processing}>
+                        <Button type="submit" disabled={processing} className="cursor-pointer">
                             {processing ? "Saving..." : submitLabel}
                         </Button>
                     </DialogFooter>
