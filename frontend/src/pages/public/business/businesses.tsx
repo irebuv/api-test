@@ -3,7 +3,7 @@ import BusinessList from "@/pages/public/business/components/business-list";
 import React, {useEffect, useState} from "react";
 import {Pagination} from "@/components/ui/custom/pagination";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
-import type {BusinessResponse, PaginatedResponse} from "@/types/businesses";
+import type {BusinessResponse} from "@/types/businesses";
 import {useAuth} from "@/context/AuthContext";
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
@@ -13,18 +13,19 @@ import {useApiForm} from "@/hooks/useApiForm";
 import {useQueryData} from "@/hooks/useQueryData";
 
 export default function Businesses() {
-    const {data, filters, setFilters, loading, refetch} = useQueryData<BusinessResponse, {
+    const {data, filters, setFilters, refetch} = useQueryData<BusinessResponse, {
         type: string;
         myProjects: number | string;
+        page: number;
     }>({
         url: "/businesses",
-        initial: {type: "all", myProjects: 0},
+        initial: {type: "all", myProjects: 0, page: 1},
     });
 
     const businessesFields = [
         {id: "name", name: "name", label: "Name", type: "text"},
         {id: "description", name: "description", label: "Description", type: "textarea"},
-        {id: "type", name: "type", label: "Type", type: "text"},
+        {id: "type", name: "type", label: "Type", type: "select"},
         {id: "image", name: "image", label: "Image", type: "file"},
     ];
     const requestFields = [
@@ -104,12 +105,12 @@ export default function Businesses() {
                 refetch();
             },
         };
-console.log(businessData, requestData)
+
         if (mode === "create") {
             submitBusiness("/businesses", "post", commonOptions);
         } else if (mode === "edit" && editingId) {
             submitBusiness(`/businesses/${editingId}`, "put", commonOptions);
-        } else if (mode === "createRequest" && editingId){
+        } else if (mode === "createRequest" && editingId) {
             submitRequest(`/businesses/request/${editingId}`, "post", commonOptions);
         }
     };
@@ -117,6 +118,14 @@ console.log(businessData, requestData)
     /*-----------Form block end-----------*/
     const {user} = useAuth();
 
+    const handleDelete = (id: number) => {
+        submitBusiness(`/businesses/${id}`, "delete", {
+            onSuccess: () => {
+                setModalOpen(false);
+                refetch();
+            }
+        });
+    }
     return (
         <MainLayout className="mx-auto mt-5 flex max-w-[1150px] flex-col gap-5 px-7">
 
@@ -152,7 +161,7 @@ console.log(businessData, requestData)
                                     onChange={(e) => setFilters({myProjects: e.target.checked ? 1 : 0})}
                                 />
                             </label>
-                            <DialogRequestShow myRequests={data?.myRequests ?? []} unreadCount={data?.unreadCount}/>
+                            <DialogRequestShow myRequests={data?.myRequests ?? []} unreadCount={data?.unreadCount ?? 0} refetch={refetch}/>
                             <Button type="button" className="cursor-pointer px-4" onClick={openCreate}>Create
                                 Business</Button>
                         </div>
@@ -167,11 +176,11 @@ console.log(businessData, requestData)
                 onOpenChange={setModalOpen}
                 title={mode === "create" ? "Create Business" : mode === "edit" ? "Edit Business" : "Create Request"}
                 description={mode === "create" ? "Create new" : mode === "edit" ? "Edit existing" : "Create a new request"}
-                fields={mode === "createRequest"  ? requestFields : businessesFields}
-                data={mode === "createRequest"  ? requestData : businessData}
-                setData={mode === "createRequest"  ? setRequestData : setBusinessData}
-                errors={mode === "createRequest"  ? requestErrors : businessErrors}
-                processing={mode === "createRequest"  ? requestProcessing : businessProcessing}
+                fields={mode === "createRequest" ? requestFields : businessesFields}
+                data={mode === "createRequest" ? requestData : businessData}
+                setData={mode === "createRequest" ? setRequestData : setBusinessData}
+                errors={mode === "createRequest" ? requestErrors : businessErrors}
+                processing={mode === "createRequest" ? requestProcessing : businessProcessing}
                 onSubmit={handleSubmit}
                 submitLabel={mode === "edit" ? "Save" : "Create"}
             />
@@ -179,9 +188,12 @@ console.log(businessData, requestData)
                 onEdit={(el) => openEdit(el)}
                 businesses={data?.businesses.data ?? []}
                 onCreateRequest={(businessId) => onCreateRequest(businessId)}
-                //onDelete={handleDelete}
+                onDelete={(businessId) => handleDelete(businessId)}
             />
-            {/*<Pagination products={data?.businesses} rowPerPage={false}/>*/}
+            <Pagination
+                products={data?.businesses}
+                onPageChange={(page) => setFilters({ page })}
+            />
         </MainLayout>
     );
 }

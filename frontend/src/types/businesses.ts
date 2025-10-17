@@ -25,7 +25,9 @@ interface Order {
 
 export interface PaginatedResponse<T> {
     data: T[];
-    to: number | null;
+    current_page: number;
+    last_page: number;
+    per_page: number;
     total: number;
 }
 
@@ -35,4 +37,5 @@ export interface BusinessResponse {
     unreadCount?: number;
     myRequests: Order[];
     myProjects?: number;
+    page?: number;
 }

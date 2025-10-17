@@ -11,3 +11,4 @@ Route::get('/me', [AuthController::class, 'me'])->middleware('auth:api');
 
 Route::resource('/businesses', BusinessController::class);
 Route::post("/businesses/request/{editingId}", [BusinessController::class, 'request']);
+Route::post("/businesses/markAsRead", [BusinessController::class, 'markAsRead']);

@@ -75,13 +75,16 @@ class BusinessController extends Controller
     public function markAsRead(Request $request)
     {
         Order::whereHas('business', function ($q) {
-            $q->where('user_id', auth()->id());
+            $q->where('user_id', auth('api')->id());
         })
             ->where('is_read', false)
             ->update(['is_read' => true]);
 
-        return back();
+        return response()->json([
+            'message' => 'Marked as read'
+        ], 200);
     }
+
 
     public function store(Request $request)
     {
@@ -181,11 +184,15 @@ class BusinessController extends Controller
 
     public function destroy(Business $business)
     {
-        if ($business && ($business->user_id === auth()->id())) {
+        if ($business->user_id === auth('api')->id()) {
             $business->delete();
-            return redirect()->back()->with('success', 'Project was deleted!');
+            return response()->json([
+                'message' => 'Project was successfully deleted!'
+            ], 200);
         } else {
-            return redirect()->back()->with('error', 'Unable to delete project!');
+            return response()->json([
+                'message' => 'Unable to delete project!'
+            ], 403);
         }
     }
 }

@@ -1,70 +1,80 @@
-import {Link} from "react-router-dom";
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
+// components/ui/custom/pagination.tsx
+import React from "react";
+import { Button } from "@/components/ui/button";
 
-interface LinkProps {
-    active: boolean;
-    label: string;
-    url: string | null;
-}
+type Paginated = {
+    current_page: number;
+    last_page: number;
+};
 
-interface PaginationData {
-    links: LinkProps[];
-    from: number;
-    to: number;
-    total: number;
-}
+type PaginationProps = {
+    products?: Paginated | null;
+    onPageChange: (page: number) => void;
+    maxPagesToShow?: number;
+};
 
-interface PaginationProps {
-    products: PaginationData;
-    perPage?: string;
-    onPerPageChange?: (value: string) => void;
-    totalCount?: number;
-    filteredCount?: number;
-    search?: string;
-    rowPerPage?: boolean;
-}
+export const Pagination: React.FC<PaginationProps> = ({
+                                                          products,
+                                                          onPageChange,
+                                                          maxPagesToShow = 7,
+                                                      }) => {
+    if (!products || products.last_page <= 1) return null;
 
-export const Pagination = ({products, perPage, onPerPageChange, totalCount, filteredCount, search, rowPerPage} : PaginationProps) => {
+    const { current_page, last_page } = products;
+
+    const range = (start: number, end: number) =>
+        Array.from({ length: end - start + 1 }, (_, i) => start + i);
+
+    // вычисляем страницы с троеточиями
+    const pages: (number | "dots")[] = [];
+    const side = Math.floor((maxPagesToShow - 3) / 2);
+    const left = Math.max(2, current_page - side);
+    const right = Math.min(last_page - 1, current_page + side);
+
+    pages.push(1);
+    if (left > 2) pages.push("dots");
+    pages.push(...range(left, right));
+    if (right < last_page - 1) pages.push("dots");
+    pages.push(last_page);
+
     return (
-        <div className="flex items-center justify-between mt-4">
+        <div className="flex items-center gap-2 justify-center mt-6">
+            <Button
+                variant="outline"
+                disabled={current_page <= 1}
+                onClick={() => onPageChange(current_page - 1)}
+                className="cursor-pointer"
+            >
+                Prev
+            </Button>
 
-            {search ? (
-                <p>Showing <strong>{filteredCount}</strong> filtered result{filteredCount !== 1 && 's'} out of <strong>{totalCount}</strong></p>
-            ) : (
-                <p>Showing <strong>{products.from}</strong> to <strong>{products.to}</strong> out of <strong>{products.total}</strong></p>
+            {pages.map((p, i) =>
+                    p === "dots" ? (
+                        <span key={i} className="px-3 select-none text-sm text-muted-foreground">
+            …
+          </span>
+                    ) : (
+                        <Button
+                            key={p}
+                            variant={p === current_page ? "default" : "outline"}
+                            onClick={() => onPageChange(p)}
+                            className="cursor-pointer"
+                        >
+                            {p}
+                        </Button>
+                    )
             )}
 
-            {rowPerPage !== false && (
-            <div className="flex items-center gap-2">
-                <span className="text-sm">Row per page:</span>
-                <Select onValueChange={onPerPageChange} value={perPage}>
-                    <SelectTrigger className="w-[90px]">
-                        <SelectValue placeholder="Row" />
-                    </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="10">10</SelectItem>
-                            <SelectItem value="25">25</SelectItem>
-                            <SelectItem value="50">50</SelectItem>
-                            <SelectItem value="100">100</SelectItem>
-                            <SelectItem value="-1">All</SelectItem>
-                        </SelectContent>
-                </Select>
-            </div>
-            )}
-
-            <div className="flex gap-2">
-                {products.links.map((link, index) => (
-
-                    <Link
-                        className={`px-3 py-2 border rounded ${link.active ? 'bg-gray-700 text-white' : ''}`}
-                        to={link.url || '#'}
-                        key={index}
-                        dangerouslySetInnerHTML={{ __html: link.label }}
-                    />
-
-                ))}
-          </div>
-
+            <Button
+                variant="outline"
+                disabled={current_page >= last_page}
+                onClick={() => onPageChange(current_page + 1)}
+                className="cursor-pointer"
+            >
+                Next
+            </Button>
         </div>
-    )
-}
+    );
+};
+
+export default Pagination;

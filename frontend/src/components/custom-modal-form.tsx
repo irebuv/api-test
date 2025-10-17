@@ -15,6 +15,7 @@ import InputError from "@/components/ui/input-error";
 import {DayPicker} from "react-day-picker";
 import {format} from "date-fns";
 import "react-day-picker/dist/style.css";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 
 type Field = {
     id: string;
@@ -81,6 +82,18 @@ export default function CustomModalForm({
                                     type="file"
                                     onChange={(e) => setData(f.name, e.target.files ? e.target.files[0] : null)}
                                 />
+                            ) : f.type === "select" ? (
+                                <Select onValueChange={(value) => setData('type', value)}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Business type" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="service">Service</SelectItem>
+                                        <SelectItem value="shop">Shop</SelectItem>
+                                        <SelectItem value="cafe">Cafe</SelectItem>
+                                        <SelectItem value="other">Other</SelectItem>
+                                    </SelectContent>
+                                </Select>
                             ) : f.type === 'date-select' ? (
                                 <div className="flex flex-col">
                                     <DayPicker

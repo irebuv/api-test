@@ -12,7 +12,7 @@ interface Order {
 }
 export default function RequestItem({ el }: { el: Order }) {
     const [highlight, setHighlight] = React.useState(false);
-
+    console.log(el.is_read)
     React.useEffect(() => {
         if (!el.is_read) {
             setHighlight(true);

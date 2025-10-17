@@ -44,6 +44,12 @@ export function useQueryData<TData, TFilters extends Record<string, any>>({
 
     const setFilters = (newValues: Partial<TFilters>) => {
         const updated = { ...filters, ...newValues };
+
+        // если фильтры изменились, но не страница — сбрасываем page = 1
+        if (!("page" in newValues)) {
+            (updated as any).page = 1;
+        }
+
         setFiltersState(updated);
 
         const params = new URLSearchParams(updated as Record<string, string>);
@@ -51,6 +57,7 @@ export function useQueryData<TData, TFilters extends Record<string, any>>({
 
         fetchData(updated);
     };
+
 
     useEffect(() => {
         fetchData(filters);

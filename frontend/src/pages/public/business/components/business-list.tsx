@@ -17,7 +17,7 @@ interface Business {
 }
 
 interface BusinessProps {
-    onDelete?: (id: number, route: string) => void;
+    onDelete?: (id: number) => void;
     onCreateRequest?: (id: number) => void;
     onEdit?: (project: Business) => void;
     businesses: Business[];
@@ -50,7 +50,7 @@ function BusinessList({ businesses, onEdit, onDelete, onCreateRequest }: Busines
                                     <Button
                                         variant={'ghost'}
                                         className={'cursor-pointer'}
-                                        //onClick={() => onDelete(el.id, route('business.destroy', el.id))}
+                                        onClick={() => onDelete?.(el.id)}
                                     >
                                         <Trash />
                                     </Button>
