@@ -1,6 +1,6 @@
 import MainLayout from "@/layouts/main-layout";
 import BusinessList from "@/pages/public/business/components/business-list";
-import React, {useEffect, useState} from "react";
+import React, {useState} from "react";
 import {Pagination} from "@/components/ui/custom/pagination";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import type {BusinessResponse} from "@/types/businesses";
@@ -79,9 +79,6 @@ export default function Businesses() {
         setEditingId(businessId);
         setModalOpen(true);
     }
-    useEffect(() => {
-        console.log("mode изменился:", mode, editingId);
-    }, [mode]);
     const openEdit = (item: any) => {
         resetRequest();
         resetBusiness({

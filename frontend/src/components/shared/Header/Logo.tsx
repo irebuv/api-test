@@ -8,7 +8,7 @@ function Logo({className}: React.ComponentProps<"div">) {
             whileHover={{ scale: 1.3 }}
             className={cn("text-3xl font-bold text-blue-600 cursor-pointer", className)}
         >
-            ShikiCopy
+            Logo
         </motion.div>
     );
 }

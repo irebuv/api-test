@@ -1,4 +1,3 @@
-// components/ui/custom/pagination.tsx
 import React from "react";
 import { Button } from "@/components/ui/button";
 
@@ -25,7 +24,6 @@ export const Pagination: React.FC<PaginationProps> = ({
     const range = (start: number, end: number) =>
         Array.from({ length: end - start + 1 }, (_, i) => start + i);
 
-    // вычисляем страницы с троеточиями
     const pages: (number | "dots")[] = [];
     const side = Math.floor((maxPagesToShow - 3) / 2);
     const left = Math.max(2, current_page - side);
@@ -77,4 +75,3 @@ export const Pagination: React.FC<PaginationProps> = ({
     );
 };
 
-export default Pagination;
